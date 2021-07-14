@@ -1,0 +1,1723 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Bryte Quick Start Stack: Bryte, EMR, S3 staging bucket",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "Sofware Disclaimer"
+          },
+          "Parameters": [
+            "BryteDisclaimer"
+          ]
+        },
+        {
+          "Label": {
+            "default": "S3 Staging Bucket Configuration"
+          },
+          "Parameters": [
+            "S3BucketName"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Cloudwatch Log Group Configurations for Bryte Appliactions"
+          },
+          "Parameters": [
+            "BryteLogGroupName",
+            "BryteAppLogRetention"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Bryte Instance Configurations"
+          },
+          "Parameters": [
+            "KeyName",
+            "VPCId",
+            "Subnet",
+            "InboundCidr",
+            "BryteIngestEC2ImageID",
+            "BryteIngestInstanceType",
+            "BryteIngestEC2SecurityGroup",
+            "BryteBlendEC2ImageID",
+            "BryteBlendInstanceType",
+            "BryteBlendEC2SecurityGroup"
+          ]
+        },
+        {
+          "Label": {
+            "default": "EMR CLuster Configurations"
+          },
+          "Parameters": [
+            "EMRClusterPrefix",
+            "TerminationProtected",
+            "BryteIngestEMRInstanceType",
+            "BryteIngestEMRReleaseLabel",
+            "BryteIngestEMREbsRootVolumeSize",
+            "BryteIngestEMRCoreNodeCount",
+            "BryteIngestEMRTaskNodeCountMin",
+            "BryteIngestEMRTaskNodeCountMax",
+            "BryteIngestEMRTaskNodeInstanceType",
+            "BryteBlendEMRInstanceType",
+            "BryteBlendEMRReleaseLabel",
+            "BryteBlendEMREbsRootVolumeSize",
+            "BryteBlendEMRCoreNodeCount",
+            "BryteBlendEMRTaskNodeCountMin",
+            "BryteBlendEMRTaskNodeCountMax",
+            "BryteBlendEMRTaskNodeInstanceType"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "BryteDisclaimer": {
+          "default": "I agree with the disclaimer in the Description area below"
+        },
+        "S3BucketName": {
+          "default": "S3 Bucket Name"
+        },
+        "BryteLogGroupName": {
+          "default": "Cloudwatch Log Group Name"
+        },
+        "BryteAppLogRetention": {
+          "default": "Cloudwatch Log Group Retention in Days"
+        },
+        "BryteIngestEC2ImageID": {
+          "default": "AMI for Creating Bryte Ingest Instance"
+        },
+        "BryteIngestEC2SecurityGroup": {
+          "default": "Security Group for Bryte Ingest Instance"
+        },
+        "BryteIngestInstanceType": {
+          "default": "Instance Type"
+        },
+        "BryteBlendEC2ImageID": {
+          "default": "AMI for Creating Bryte Blend Instance"
+        },
+        "BryteBlendEC2SecurityGroup": {
+          "default": "Security Group for Bryte Blend Instance"
+        },
+        "BryteBlendInstanceType": {
+          "default": "Instance Type"
+        },
+        "InboundCidr": {
+          "default": "Inbound Network Address Range"
+        },
+        "KeyName": {
+          "default": "Keypair Name"
+        },
+        "Subnet": {
+          "default": "Subnet For Bryte Instance and EMR Cluster"
+        },
+        "VPCId": {
+          "default": "VPC Id"
+        },
+        "EMRClusterPrefix": {
+          "default": "EMR Cluster Name Prefix"
+        },
+        "TerminationProtected": {
+          "default": "Enable Termination Protected"
+        },
+        "BryteIngestEMRInstanceType": {
+          "default": "EMR Master and Core Nodes Instance Type"
+        },
+        "BryteIngestEMRReleaseLabel": {
+          "default": "AWS EMR Software Release Label "
+        },
+        "BryteIngestEMREbsRootVolumeSize": {
+          "default": "Root Volume Size of All EMR Nodes"
+        },
+        "BryteIngestEMRCoreNodeCount": {
+          "default": "Number of EMR Core Nodes"
+        },
+        "BryteIngestEMRTaskNodeCountMin": {
+          "default": "Minimum Number of EMR Task Nodes"
+        },
+        "BryteIngestEMRTaskNodeCountMax": {
+          "default": "Max Number of EMR Task Nodes"
+        },
+        "BryteIngestEMRTaskNodeInstanceType": {
+          "default": "EMR Task Nodes Instance Type"
+        },
+        "BryteBlendEMRInstanceType": {
+          "default": "EMR Master and Core Nodes Instance Type"
+        },
+        "BryteBlendEMRReleaseLabel": {
+          "default": "AWS EMR Software Release Label "
+        },
+        "BryteBlendEMREbsRootVolumeSize": {
+          "default": "Root Volume Size of All EMR Nodes"
+        },
+        "BryteBlendEMRCoreNodeCount": {
+          "default": "Number of EMR Core Nodes"
+        },
+        "BryteBlendEMRTaskNodeCountMin": {
+          "default": "Minimum Number of EMR Task Nodes"
+        },
+        "BryteBlendEMRTaskNodeCountMax": {
+          "default": "Max Number of EMR Task Nodes"
+        },
+        "BryteBlendEMRTaskNodeInstanceType": {
+          "default": "EMR Task Nodes Instance Type"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "BryteDisclaimer": {
+      "Type": "String",
+      "Description": "Bryte Systems Pty Ltd assumes no responsibility or liability for the use of the software,\n   conveys no license or title under any patent, copyright, or mask work right to the product.\n   Bryte Systems Pty Ltd reserves the right to make changes in the software without notification.\n   Bryte Systems Pty Ltd also make no representation or warranty that such application will be\n   suitable for the specified use without further testing or modification.\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, \nINCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR \nPURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE \nFOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR \nOTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER \nDEALINGS IN THE SOFTWARE",
+      "Default": "Yes",
+      "AllowedPattern": "(\\b[Y,y][E,e][S,s]\\b)"
+    },
+    "S3BucketName": {
+      "Type": "String",
+      "Default": "bryte.staging.bucket",
+      "Description": "all lower case "
+    },
+    "BryteLogGroupName": {
+      "Type": "String",
+      "Default": "Bryte",
+      "Description": "Please provide a unique log group name"
+    },
+    "BryteAppLogRetention": {
+      "Type": "Number",
+      "Default": "30",
+      "AllowedValues": [
+        "1",
+        "3",
+        "5",
+        "7",
+        "14",
+        "30",
+        "60",
+        "90",
+        "120",
+        "150",
+        "180",
+        "365",
+        "400",
+        "545",
+        "731",
+        "1827",
+        "3653"
+      ],
+      "Description": "In days"
+    },
+    "BryteIngestInstanceType": {
+      "AllowedValues": [
+        "t2.micro",
+        "t2.large",
+        "t2.xlarge",
+        "t2.2xlarge",
+        "m4.large",
+        "m4.xlarge",
+        "m4.2xlarge"
+      ],
+      "Default": "m4.xlarge",
+      "Description": "Bryte Ingest instance(s) size. ",
+      "Type": "String"
+    },
+    "BryteIngestEC2ImageID": {
+      "Description": "Image ID for creating Bryte Instance",
+      "Type": "String",
+      "Default": "ami-6169a803"
+    },
+    "BryteIngestEC2SecurityGroup": {
+      "Description": "The Security Group Name",
+      "Type": "String"
+    },
+    "BryteBlendInstanceType": {
+      "AllowedValues": [
+        "t2.micro",
+        "t2.large",
+        "t2.xlarge",
+        "t2.2xlarge",
+        "m4.large",
+        "m4.xlarge",
+        "m4.2xlarge"
+      ],
+      "Default": "m4.xlarge",
+      "Description": "Bryte Blend instance(s) size. ",
+      "Type": "String"
+    },
+    "BryteBlendEC2ImageID": {
+      "Description": "Image ID for creating Bryte Instance",
+      "Type": "String",
+      "Default": "ami-6169a803"
+    },
+    "BryteBlendEC2SecurityGroup": {
+      "Description": "The Security Group Name",
+      "Type": "String"
+    },
+    "KeyName": {
+      "Description": "The selected key pair will be added to the set of keys authorized for this instance",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+    "InboundCidr": {
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "Description": "Inbound IPv4 CIDR Range of source to access Bryte instance ",
+      "Type": "String"
+    },
+    "Subnet": {
+      "Description": "An existing subnet to launch the Bryte ec2 instance and EMR cluster nodes into. MAKE SURE IT IS IN THE VPC YOU SELECTED",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "VPCId": {
+      "Description": "The VPC in which to create security groups. This must be the VPC containing the subnet(s).",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "EMRClusterPrefix": {
+      "Type": "String",
+      "Default": "bryte-emr-",
+      "Description": "all lower case "
+    },
+    "TerminationProtected": {
+      "Type": "String",
+      "Default": "false"
+    },
+    "BryteIngestEMRInstanceType": {
+      "AllowedValues": [
+        "m4.large",
+        "m4.xlarge",
+        "m4.2xlarge"
+      ],
+      "Default": "m4.large",
+      "Description": "EMR Master and Core nodes size. ",
+      "Type": "String"
+    },
+    "BryteIngestEMRReleaseLabel": {
+      "Type": "String",
+      "Default": "emr-5.17.0"
+    },
+    "BryteIngestEMREbsRootVolumeSize": {
+      "Type": "String",
+      "Description": "Volume Size in GB, between 10 and 100",
+      "Default": "10"
+    },
+    "BryteIngestEMRCoreNodeCount": {
+      "Type": "String",
+      "Default": "2"
+    },
+    "BryteIngestEMRTaskNodeCountMin": {
+      "Type": "String",
+      "Default": "0"
+    },
+    "BryteIngestEMRTaskNodeCountMax": {
+      "Type": "String",
+      "Default": "8"
+    },
+    "BryteIngestEMRTaskNodeInstanceType": {
+      "AllowedValues": [
+        "m4.large",
+        "m4.xlarge",
+        "m4.2xlarge",
+        "c4.2xlarge"
+      ],
+      "Default": "m4.xlarge",
+      "Description": "EMR Task node(s) size. ",
+      "Type": "String"
+    },
+    "BryteBlendEMRInstanceType": {
+      "AllowedValues": [
+        "m4.large",
+        "m4.xlarge",
+        "m4.2xlarge"
+      ],
+      "Default": "m4.large",
+      "Description": "EMR Master and Core nodes size. ",
+      "Type": "String"
+    },
+    "BryteBlendEMRReleaseLabel": {
+      "Type": "String",
+      "Default": "emr-5.17.0"
+    },
+    "BryteBlendEMREbsRootVolumeSize": {
+      "Type": "String",
+      "Description": "Volume Size in GB, between 10 and 100",
+      "Default": "10"
+    },
+    "BryteBlendEMRCoreNodeCount": {
+      "Type": "String",
+      "Default": "2"
+    },
+    "BryteBlendEMRTaskNodeCountMin": {
+      "Type": "String",
+      "Default": "0"
+    },
+    "BryteBlendEMRTaskNodeCountMax": {
+      "Type": "String",
+      "Default": "8"
+    },
+    "BryteBlendEMRTaskNodeInstanceType": {
+      "AllowedValues": [
+        "m4.large",
+        "m4.xlarge",
+        "m4.2xlarge",
+        "c4.2xlarge"
+      ],
+      "Default": "m4.xlarge",
+      "Description": "EMR Task node(s) size. ",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "loggroupBryte": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Ref": "BryteLogGroupName"
+        },
+        "RetentionInDays": {
+          "Ref": "BryteAppLogRetention"
+        }
+      }
+    },
+    "s3bucketStaging": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "S3BucketName"
+              },
+              "-",
+              {
+                "Ref": "AWS::AccountId"
+              }
+            ]
+          ]
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "bucketpolicyStaging": {
+      "DependsOn": [
+        "ec2roleBryteBlend",
+        "ec2roleBryteIngest",
+        "emrEc2Role",
+        "emrRole"
+      ],
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Id": "StagingBucketPolicy",
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AccessResctriction",
+              "Effect": "Deny",
+              "NotPrincipal": {
+                "AWS": [
+                  {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:iam::",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        ":role/",
+                        {
+                          "Ref": "ec2roleBryteIngest"
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:iam::",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        ":role/",
+                        {
+                          "Ref": "ec2roleBryteBlend"
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:iam::",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        ":role/",
+                        {
+                          "Ref": "emrRole"
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:iam::",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        ":role/",
+                        {
+                          "Ref": "emrEc2Role"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              },
+              "Action": [
+                "s3:*Object*",
+                "s3:*Multipart*"
+              ],
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "s3bucketStaging"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        "Bucket": {
+          "Ref": "s3bucketStaging"
+        }
+      }
+    },
+    "ec2InstanceBryteIngest": {
+      "DependsOn": [
+        "ec2roleBryteIngest",
+        "securitygroupBryteIngest"
+      ],
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "IamInstanceProfile": {
+          "Ref": "instanceprofileBryteIngest"
+        },
+        "ImageId": {
+          "Ref": "BryteIngestEC2ImageID"
+        },
+        "InstanceType": {
+          "Ref": "BryteIngestInstanceType"
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "securitygroupBryteIngest",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetId": {
+          "Ref": "Subnet"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Bryte-Ingest-Server"
+          }
+        ]
+      }
+    },
+    "instanceprofileBryteIngest": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "ec2roleBryteIngest"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::InstanceProfile"
+    },
+    "securitygroupBryteIngest": {
+      "Properties": {
+        "GroupDescription": "securitygroupBryteIngest",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "3389",
+            "ToPort": "3389",
+            "IpProtocol": "tcp",
+            "CidrIp": {
+              "Ref": "InboundCidr"
+            },
+            "Description": "RDP"
+          },
+          {
+            "IpProtocol": "-1",
+            "FromPort": "-1",
+            "ToPort": "-1",
+            "SourceSecurityGroupId": {
+              "Fn::GetAtt": [
+                "securitygroupBryteBlend",
+                "GroupId"
+              ]
+            }
+          }
+        ],
+        "SecurityGroupEgress": [
+          {
+            "FromPort": "443",
+            "ToPort": "443",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "FromPort": "80",
+            "ToPort": "80",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "FromPort": "123",
+            "ToPort": "123",
+            "IpProtocol": "udp",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "FromPort": "53",
+            "ToPort": "53",
+            "IpProtocol": "udp",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "FromPort": "53",
+            "ToPort": "53",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "-1",
+            "FromPort": "-1",
+            "ToPort": "-1",
+            "DestinationSecurityGroupId": {
+              "Fn::GetAtt": [
+                "securitygroupBryteBlend",
+                "GroupId"
+              ]
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "VPCId"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Ref": "BryteIngestEC2SecurityGroup"
+            }
+          }
+        ]
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "ec2roleBryteIngest": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:List*",
+                    "s3:Get*",
+                    "s3:*Object*",
+                    "s3:*Multipart*"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:s3:::",
+                          {
+                            "Ref": "s3bucketStaging"
+                          },
+                          "/*"
+                        ]
+                      ]
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:s3:::",
+                          {
+                            "Ref": "s3bucketStaging"
+                          }
+                        ]
+                      ]
+                    }
+                  ],
+                  "Sid": "StageingBucketAccess"
+                }
+              ]
+            },
+            "PolicyName": "BryteInstanceRolePolicy"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "ec2InstanceBryteBlend": {
+      "DependsOn": [
+        "ec2roleBryteBlend",
+        "securitygroupBryteBlend"
+      ],
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "IamInstanceProfile": {
+          "Ref": "instanceprofileBryteBlend"
+        },
+        "ImageId": {
+          "Ref": "BryteBlendEC2ImageID"
+        },
+        "InstanceType": {
+          "Ref": "BryteBlendInstanceType"
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "securitygroupBryteBlend",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetId": {
+          "Ref": "Subnet"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Bryte-Blend-Server"
+          }
+        ]
+      }
+    },
+    "instanceprofileBryteBlend": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "ec2roleBryteBlend"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::InstanceProfile"
+    },
+    "securitygroupBryteBlend": {
+      "Properties": {
+        "GroupDescription": "securitygroupBryteBlend",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "3389",
+            "ToPort": "3389",
+            "IpProtocol": "tcp",
+            "CidrIp": {
+              "Ref": "InboundCidr"
+            },
+            "Description": "RDP"
+          }
+        ],
+        "SecurityGroupEgress": [
+          {
+            "FromPort": "443",
+            "ToPort": "443",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "FromPort": "80",
+            "ToPort": "80",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "FromPort": "123",
+            "ToPort": "123",
+            "IpProtocol": "udp",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "FromPort": "53",
+            "ToPort": "53",
+            "IpProtocol": "udp",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "FromPort": "53",
+            "ToPort": "53",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "VpcId": {
+          "Ref": "VPCId"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Ref": "BryteBlendEC2SecurityGroup"
+            }
+          }
+        ]
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "ec2roleBryteBlend": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:List*",
+                    "s3:Get*",
+                    "s3:*Object*",
+                    "s3:*Multipart*"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:s3:::",
+                          {
+                            "Ref": "s3bucketStaging"
+                          },
+                          "/*"
+                        ]
+                      ]
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:s3:::",
+                          {
+                            "Ref": "s3bucketStaging"
+                          }
+                        ]
+                      ]
+                    }
+                  ],
+                  "Sid": "StageingBucketAccess"
+                }
+              ]
+            },
+            "PolicyName": "BryteInstanceRolePolicy"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "securitygrouprulesBryteBlendEgressSelf": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "IpProtocol": "-1",
+        "FromPort": "-1",
+        "ToPort": "-1",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "securitygroupBryteBlend",
+            "GroupId"
+          ]
+        },
+        "GroupId": {
+          "Fn::GetAtt": [
+            "securitygroupBryteBlend",
+            "GroupId"
+          ]
+        }
+      }
+    },
+    "securitygrouprulesBryteBlendEgressIngest": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "IpProtocol": "-1",
+        "FromPort": "-1",
+        "ToPort": "-1",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "securitygroupBryteIngest",
+            "GroupId"
+          ]
+        },
+        "GroupId": {
+          "Fn::GetAtt": [
+            "securitygroupBryteBlend",
+            "GroupId"
+          ]
+        }
+      }
+    },
+    "securitygrouprulesBryteBlendIngressSelf": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "-1",
+        "FromPort": "-1",
+        "ToPort": "-1",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "securitygroupBryteBlend",
+            "GroupId"
+          ]
+        },
+        "GroupId": {
+          "Fn::GetAtt": [
+            "securitygroupBryteBlend",
+            "GroupId"
+          ]
+        }
+      }
+    },
+    "securitygrouprulesBryteBlendIngressIngest": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "-1",
+        "FromPort": "-1",
+        "ToPort": "-1",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "securitygroupBryteIngest",
+            "GroupId"
+          ]
+        },
+        "GroupId": {
+          "Fn::GetAtt": [
+            "securitygroupBryteBlend",
+            "GroupId"
+          ]
+        }
+      }
+    },
+    "s3bucketEMRLogs": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "EMRClusterPrefix"
+              },
+              "log.bucket.",
+              {
+                "Ref": "AWS::AccountId"
+              }
+            ]
+          ]
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "bucketpolicyEMRLogs": {
+      "DependsOn": [
+        "ec2roleBryteBlend",
+        "emrEc2Role",
+        "emrRole"
+      ],
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Id": "EMRLogBucketPolicy",
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AccessResctriction",
+              "Effect": "Deny",
+              "NotPrincipal": {
+                "AWS": [
+                  {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:iam::",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        ":role/",
+                        {
+                          "Ref": "ec2roleBryteBlend"
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:iam::",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        ":role/",
+                        {
+                          "Ref": "emrRole"
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:iam::",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        ":role/",
+                        {
+                          "Ref": "emrASGEc2Role"
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:iam::",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        ":role/",
+                        {
+                          "Ref": "emrEc2Role"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              },
+              "Action": [
+                "s3:*Object*",
+                "s3:*Multipart*"
+              ],
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "s3bucketEMRLogs"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        "Bucket": {
+          "Ref": "s3bucketEMRLogs"
+        }
+      }
+    },
+    "emrRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2008-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "elasticmapreduce.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": "/",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceRole"
+        ]
+      }
+    },
+    "emrEc2Role": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2008-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": "/",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role"
+        ]
+      }
+    },
+    "emrASGEc2Role": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2008-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "elasticmapreduce.amazonaws.com",
+                  "application-autoscaling.amazonaws.com"
+                ]
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": "/",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforAutoScalingRole"
+        ]
+      }
+    },
+    "emrEc2InstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "emrEc2Role"
+          }
+        ]
+      }
+    },
+    "emrclusterBryteIngest": {
+      "Type": "AWS::EMR::Cluster",
+      "Properties": {
+        "Applications": [
+          {
+            "Name": "Hadoop"
+          },
+          {
+            "Name": "Spark"
+          },
+          {
+            "Name": "Ganglia"
+          }
+        ],
+        "LogUri": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "s3bucketEMRLogs"
+              },
+              "/Ingest/"
+            ]
+          ]
+        },
+        "EbsRootVolumeSize": {
+          "Ref": "BryteIngestEMREbsRootVolumeSize"
+        },
+        "Instances": {
+          "MasterInstanceGroup": {
+            "InstanceCount": 1,
+            "InstanceType": {
+              "Ref": "BryteIngestEMRInstanceType"
+            },
+            "EbsConfiguration": {
+              "EbsBlockDeviceConfigs": [
+                {
+                  "VolumeSpecification": {
+                    "SizeInGB": 500,
+                    "VolumeType": "st1"
+                  },
+                  "VolumesPerInstance": 1
+                }
+              ],
+              "EbsOptimized": true
+            },
+            "Market": "ON_DEMAND",
+            "Name": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "EMRClusterPrefix"
+                  },
+                  "Ingest-Master"
+                ]
+              ]
+            }
+          },
+          "CoreInstanceGroup": {
+            "InstanceCount": {
+              "Ref": "BryteIngestEMRCoreNodeCount"
+            },
+            "InstanceType": {
+              "Ref": "BryteIngestEMRInstanceType"
+            },
+            "EbsConfiguration": {
+              "EbsBlockDeviceConfigs": [
+                {
+                  "VolumeSpecification": {
+                    "SizeInGB": 500,
+                    "VolumeType": "st1"
+                  },
+                  "VolumesPerInstance": 1
+                }
+              ],
+              "EbsOptimized": true
+            },
+            "Market": "ON_DEMAND",
+            "Name": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "EMRClusterPrefix"
+                  },
+                  "Ingest-Core"
+                ]
+              ]
+            }
+          },
+          "TerminationProtected": {
+            "Ref": "TerminationProtected"
+          },
+          "Ec2SubnetId": {
+            "Ref": "Subnet"
+          }
+        },
+        "Name": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "EMRClusterPrefix"
+              },
+              "Ingest-Cluster"
+            ]
+          ]
+        },
+        "JobFlowRole": {
+          "Ref": "emrEc2InstanceProfile"
+        },
+        "ServiceRole": {
+          "Ref": "emrRole"
+        },
+        "AutoScalingRole": {
+          "Ref": "emrASGEc2Role"
+        },
+        "ReleaseLabel": {
+          "Ref": "BryteIngestEMRReleaseLabel"
+        },
+        "VisibleToAllUsers": true,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "EMRClusterPrefix"
+                  },
+                  "Ingest-Cluster"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "emrtaskgroupconfigBryteIngest": {
+      "Type": "AWS::EMR::InstanceGroupConfig",
+      "Properties": {
+        "InstanceCount": {
+          "Ref": "BryteIngestEMRTaskNodeCountMin"
+        },
+        "InstanceType": {
+          "Ref": "BryteIngestEMRTaskNodeInstanceType"
+        },
+        "InstanceRole": "TASK",
+        "Market": "ON_DEMAND",
+        "Name": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "EMRClusterPrefix"
+              },
+              "Ingest-Task"
+            ]
+          ]
+        },
+        "JobFlowId": {
+          "Ref": "emrclusterBryteIngest"
+        },
+        "AutoScalingPolicy": {
+          "Constraints": {
+            "MinCapacity": {
+              "Ref": "BryteIngestEMRTaskNodeCountMin"
+            },
+            "MaxCapacity": {
+              "Ref": "BryteIngestEMRTaskNodeCountMax"
+            }
+          },
+          "Rules": [
+            {
+              "Name": "Scale-out",
+              "Description": "Scale-out policy",
+              "Action": {
+                "SimpleScalingPolicyConfiguration": {
+                  "AdjustmentType": "CHANGE_IN_CAPACITY",
+                  "ScalingAdjustment": 1,
+                  "CoolDown": 300
+                }
+              },
+              "Trigger": {
+                "CloudWatchAlarmDefinition": {
+                  "Dimensions": [
+                    {
+                      "Key": "JobFlowId",
+                      "Value": "${emr.clusterId}"
+                    }
+                  ],
+                  "EvaluationPeriods": 1,
+                  "Namespace": "AWS/ElasticMapReduce",
+                  "Period": 300,
+                  "ComparisonOperator": "LESS_THAN",
+                  "Statistic": "AVERAGE",
+                  "Threshold": 15,
+                  "Unit": "PERCENT",
+                  "MetricName": "YARNMemoryAvailablePercentage"
+                }
+              }
+            },
+            {
+              "Name": "Scale-in",
+              "Description": "Scale-in policy",
+              "Action": {
+                "SimpleScalingPolicyConfiguration": {
+                  "AdjustmentType": "CHANGE_IN_CAPACITY",
+                  "ScalingAdjustment": -1,
+                  "CoolDown": 300
+                }
+              },
+              "Trigger": {
+                "CloudWatchAlarmDefinition": {
+                  "Dimensions": [
+                    {
+                      "Key": "JobFlowId",
+                      "Value": "${emr.clusterId}"
+                    }
+                  ],
+                  "EvaluationPeriods": 1,
+                  "Namespace": "AWS/ElasticMapReduce",
+                  "Period": 300,
+                  "ComparisonOperator": "GREATER_THAN",
+                  "Statistic": "AVERAGE",
+                  "Threshold": 75,
+                  "Unit": "PERCENT",
+                  "MetricName": "YARNMemoryAvailablePercentage"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "emrclusterBryteBlend": {
+      "Type": "AWS::EMR::Cluster",
+      "Properties": {
+        "Applications": [
+          {
+            "Name": "Hadoop"
+          },
+          {
+            "Name": "Spark"
+          },
+          {
+            "Name": "Ganglia"
+          }
+        ],
+        "LogUri": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "s3bucketEMRLogs"
+              },
+              "/Blend/"
+            ]
+          ]
+        },
+        "EbsRootVolumeSize": {
+          "Ref": "BryteBlendEMREbsRootVolumeSize"
+        },
+        "Instances": {
+          "MasterInstanceGroup": {
+            "InstanceCount": 1,
+            "InstanceType": {
+              "Ref": "BryteBlendEMRInstanceType"
+            },
+            "EbsConfiguration": {
+              "EbsBlockDeviceConfigs": [
+                {
+                  "VolumeSpecification": {
+                    "SizeInGB": 500,
+                    "VolumeType": "st1"
+                  },
+                  "VolumesPerInstance": 1
+                }
+              ],
+              "EbsOptimized": true
+            },
+            "Market": "ON_DEMAND",
+            "Name": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "EMRClusterPrefix"
+                  },
+                  "Blend-Master"
+                ]
+              ]
+            }
+          },
+          "CoreInstanceGroup": {
+            "InstanceCount": {
+              "Ref": "BryteBlendEMRCoreNodeCount"
+            },
+            "InstanceType": {
+              "Ref": "BryteBlendEMRInstanceType"
+            },
+            "EbsConfiguration": {
+              "EbsBlockDeviceConfigs": [
+                {
+                  "VolumeSpecification": {
+                    "SizeInGB": 500,
+                    "VolumeType": "st1"
+                  },
+                  "VolumesPerInstance": 1
+                }
+              ],
+              "EbsOptimized": true
+            },
+            "Market": "ON_DEMAND",
+            "Name": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "EMRClusterPrefix"
+                  },
+                  "Blend-Core"
+                ]
+              ]
+            }
+          },
+          "TerminationProtected": {
+            "Ref": "TerminationProtected"
+          },
+          "Ec2SubnetId": {
+            "Ref": "Subnet"
+          }
+        },
+        "Name": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "EMRClusterPrefix"
+              },
+              "Blend-Cluster"
+            ]
+          ]
+        },
+        "JobFlowRole": {
+          "Ref": "emrEc2InstanceProfile"
+        },
+        "ServiceRole": {
+          "Ref": "emrRole"
+        },
+        "AutoScalingRole": {
+          "Ref": "emrASGEc2Role"
+        },
+        "ReleaseLabel": {
+          "Ref": "BryteBlendEMRReleaseLabel"
+        },
+        "VisibleToAllUsers": true,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "EMRClusterPrefix"
+                  },
+                  "Blend-Cluster"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "emrtaskgroupconfigBryteBlend": {
+      "Type": "AWS::EMR::InstanceGroupConfig",
+      "Properties": {
+        "InstanceCount": {
+          "Ref": "BryteBlendEMRTaskNodeCountMin"
+        },
+        "InstanceType": {
+          "Ref": "BryteBlendEMRTaskNodeInstanceType"
+        },
+        "InstanceRole": "TASK",
+        "Market": "ON_DEMAND",
+        "Name": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "EMRClusterPrefix"
+              },
+              "Blend-Task"
+            ]
+          ]
+        },
+        "JobFlowId": {
+          "Ref": "emrclusterBryteBlend"
+        },
+        "AutoScalingPolicy": {
+          "Constraints": {
+            "MinCapacity": {
+              "Ref": "BryteBlendEMRTaskNodeCountMin"
+            },
+            "MaxCapacity": {
+              "Ref": "BryteBlendEMRTaskNodeCountMax"
+            }
+          },
+          "Rules": [
+            {
+              "Name": "Scale-out",
+              "Description": "Scale-out policy",
+              "Action": {
+                "SimpleScalingPolicyConfiguration": {
+                  "AdjustmentType": "CHANGE_IN_CAPACITY",
+                  "ScalingAdjustment": 1,
+                  "CoolDown": 300
+                }
+              },
+              "Trigger": {
+                "CloudWatchAlarmDefinition": {
+                  "Dimensions": [
+                    {
+                      "Key": "JobFlowId",
+                      "Value": "${emr.clusterId}"
+                    }
+                  ],
+                  "EvaluationPeriods": 1,
+                  "Namespace": "AWS/ElasticMapReduce",
+                  "Period": 300,
+                  "ComparisonOperator": "LESS_THAN",
+                  "Statistic": "AVERAGE",
+                  "Threshold": 15,
+                  "Unit": "PERCENT",
+                  "MetricName": "YARNMemoryAvailablePercentage"
+                }
+              }
+            },
+            {
+              "Name": "Scale-in",
+              "Description": "Scale-in policy",
+              "Action": {
+                "SimpleScalingPolicyConfiguration": {
+                  "AdjustmentType": "CHANGE_IN_CAPACITY",
+                  "ScalingAdjustment": -1,
+                  "CoolDown": 300
+                }
+              },
+              "Trigger": {
+                "CloudWatchAlarmDefinition": {
+                  "Dimensions": [
+                    {
+                      "Key": "JobFlowId",
+                      "Value": "${emr.clusterId}"
+                    }
+                  ],
+                  "EvaluationPeriods": 1,
+                  "Namespace": "AWS/ElasticMapReduce",
+                  "Period": 300,
+                  "ComparisonOperator": "GREATER_THAN",
+                  "Statistic": "AVERAGE",
+                  "Threshold": 75,
+                  "Unit": "PERCENT",
+                  "MetricName": "YARNMemoryAvailablePercentage"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "BryteIngestInstancePrivateEndpoint": {
+      "Description": "Private Endpoint for Bryte Ingest Instance",
+      "Value": {
+        "Fn::GetAtt": [
+          "ec2InstanceBryteIngest",
+          "PrivateIp"
+        ]
+      }
+    },
+    "BryteBlendInstancePrivateEndpoint": {
+      "Description": "Private Endpoint for Bryte Blend Instance",
+      "Value": {
+        "Fn::GetAtt": [
+          "ec2InstanceBryteBlend",
+          "PrivateIp"
+        ]
+      }
+    },
+    "S3BucketName": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "s3://",
+            {
+              "Ref": "s3bucketStaging"
+            }
+          ]
+        ]
+      },
+      "Description": "Name of Bryte Staging S3 bucket"
+    },
+    "EMRLogS3BucketName": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "s3://",
+            {
+              "Ref": "s3bucketEMRLogs"
+            }
+          ]
+        ]
+      },
+      "Description": "Name of EMR Log S3 bucket"
+    },
+    "EMRClusterDNSNameIngest": {
+      "Value": {
+        "Fn::GetAtt": [
+          "emrclusterBryteIngest",
+          "MasterPublicDNS"
+        ]
+      },
+      "Description": "EMR Master DNS"
+    },
+    "EMRClusterClusterIDIngest": {
+      "Value": {
+        "Ref": "emrclusterBryteIngest"
+      },
+      "Description": "EMR Cluster ID"
+    },
+    "EMRClusterDNSNameBlend": {
+      "Value": {
+        "Fn::GetAtt": [
+          "emrclusterBryteBlend",
+          "MasterPublicDNS"
+        ]
+      },
+      "Description": "EMR Master DNS"
+    },
+    "EMRClusterClusterIDBlend": {
+      "Value": {
+        "Ref": "emrclusterBryteBlend"
+      },
+      "Description": "EMR Cluster ID"
+    }
+  }
+}
